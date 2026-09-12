@@ -689,41 +689,36 @@ def input_page():
 
     st.title("🥕 새 식품 추가하기")
 
-# =========================================
-# 1. 보관 환경
-# =========================================
+    # ==============================
+    # 1. 보관 환경
+    # ==============================
 
-st.subheader("1. 보관 환경")
+    st.subheader("1. 보관 환경")
 
-storage_options = [
-    "🧊 냉장",
-    "❄️ 냉동",
-    "🧺 상온"
-]
+    storage_options = [
+        "🧊 냉장",
+        "❄️ 냉동",
+        "🧺 상온"
+    ]
 
-# 현재 선택된 값이 있으면 그것을 기본값으로 사용
-current_storage = st.session_state.get("storage")
+    current_storage = st.session_state.get("storage")
 
-if current_storage == "냉장":
-    default_storage = "🧊 냉장"
-elif current_storage == "냉동":
-    default_storage = "❄️ 냉동"
-elif current_storage == "상온":
-    default_storage = "🧺 상온"
-else:
-    default_storage = None
+    if current_storage == "냉장":
+        default_storage = "🧊 냉장"
+    elif current_storage == "냉동":
+        default_storage = "❄️ 냉동"
+    elif current_storage == "상온":
+        default_storage = "🧺 상온"
+    else:
+        default_storage = None
 
-# 선택 버튼
-selected_storage = st.pills(
-    "보관 환경을 선택하세요",
-    storage_options,
-    selection_mode="single",
-    default=default_storage,
-    label_visibility="collapsed"
-)
-
-# 선택 결과 저장
-if selected_storage is not None:
+    selected_storage = st.pills(
+        "보관 환경을 선택하세요",
+        storage_options,
+        selection_mode="single",
+        default=default_storage,
+        label_visibility="collapsed"
+    )
 
     if selected_storage == "🧊 냉장":
         st.session_state.storage = "냉장"
@@ -734,41 +729,31 @@ if selected_storage is not None:
     elif selected_storage == "🧺 상온":
         st.session_state.storage = "상온"
 
+    storage = st.session_state.get("storage")
 
-storage = st.session_state.get("storage")
+    if storage is None:
+        st.info("👆 보관 환경을 선택해주세요.")
+        return
 
-if storage is None:
-    st.info("👆 보관 환경을 선택해주세요.")
-    return
+    st.success(f"현재 선택: {storage}")
 
-st.success(f"현재 선택: {storage}")
+    st.divider()
 
-st.divider()
-
-    # =========================================
+    # ==============================
     # 2. 식품 정보
-    # =========================================
+    # ==============================
 
     st.subheader("2. 식품 정보")
 
-    # 식품 종류
     food_type = st.selectbox(
         "식품 종류",
         list(FOOD_TYPES.keys())
     )
 
-    # 사용자가 직접 식품 이름 입력
     food_name = st.text_input(
         "식품 이름",
         placeholder="예: 김치볶음밥, 남은 피자, 딸기잼"
     )
-
-    if food_name.strip() == "":
-        st.caption("식품 이름을 입력해주세요.")
-
-    # =========================================
-    # 보관 시작 날짜
-    # =========================================
 
     today = datetime.now(KST).date()
 
@@ -778,9 +763,9 @@ st.divider()
         max_value=today
     )
 
-    # =========================================
-    # 현재 온도
-    # =========================================
+    # ==============================
+    # 온도
+    # ==============================
 
     if storage == "냉장":
 
@@ -812,9 +797,9 @@ st.divider()
             step=0.5
         )
 
-    # =========================================
+    # ==============================
     # 개봉 여부
-    # =========================================
+    # ==============================
 
     opened = st.radio(
         "개봉 여부",
@@ -822,9 +807,9 @@ st.divider()
         horizontal=True
     )
 
-    # =========================================
+    # ==============================
     # 조리 여부
-    # =========================================
+    # ==============================
 
     cooked = st.radio(
         "조리 여부",
@@ -834,66 +819,50 @@ st.divider()
 
     st.divider()
 
-    # =========================================
-    # 식품 추가 버튼
-    # =========================================
+    # ==============================
+    # 미생물 확인
+    # ==============================
 
     if st.button(
         "🦠 내 식품 속 미생물 확인하기",
         use_container_width=True
     ):
 
-        # 식품 이름 입력 확인
         if food_name.strip() == "":
             st.error("식품 이름을 입력해주세요.")
             return
 
-        # 최대 20개 제한
         if len(st.session_state.foods) >= MAX_FOODS:
             st.error(
                 f"식품은 최대 {MAX_FOODS}개까지만 등록할 수 있습니다."
             )
             return
 
-        # 미래 날짜 방지
         if start_date > today:
             st.error(
                 "보관 시작일은 현재보다 미래로 설정할 수 없습니다."
             )
             return
 
-        # 식품 정보 저장
         food_data = {
-
             "id": datetime.now(KST).strftime(
                 "%Y%m%d%H%M%S%f"
             ),
-
             "food_type": food_type,
-
             "food_name": food_name.strip(),
-
             "storage": storage,
-
             "start_date": start_date.isoformat(),
-
             "temperature": temperature,
-
             "opened": opened == "개봉함",
-
             "cooked": cooked == "조리함"
         }
 
-        # 식품 목록에 추가
         st.session_state.foods.append(food_data)
 
-        # 파일에 저장
         save_foods(st.session_state.foods)
 
-        # 선택된 식품 지정
         st.session_state.selected_food = food_data["id"]
 
-        # 결과 화면으로 이동
         st.session_state.page = "result"
 
         st.rerun()
