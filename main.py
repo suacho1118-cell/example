@@ -743,7 +743,7 @@ if storage is None:
 
 st.success(f"현재 선택: {storage}")
 
-    st.divider()
+st.divider()
 
     # =========================================
     # 2. 식품 정보
