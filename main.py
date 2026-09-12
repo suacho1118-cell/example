@@ -507,97 +507,90 @@ def get_days(start_date):
 
 def home_page():
 
-    st.markdown("""
-    <div class="home-box">
+    st.markdown(
+        """
+<div class="home-box">
 
-        <!-- 흐릿한 냉장고 -->
-        <div class="fridge-shape">
-            <div class="fridge-handle"></div>
-        </div>
+<div class="fridge-shape">
+    <div class="fridge-handle"></div>
+</div>
 
-        <!-- 상온 선반 -->
-        <div class="shelf"></div>
+<div class="shelf"></div>
 
-        <!-- 상온 바구니 -->
-        <div class="basket"></div>
+<div class="basket"></div>
 
-        <!-- 식품 -->
-        <div class="food-decoration apple">
-            🍎
-        </div>
+<div class="food-decoration apple">
+    🍎
+</div>
 
-        <div class="food-decoration milk">
-            🥛
-        </div>
+<div class="food-decoration milk">
+    🥛
+</div>
 
-        <div class="food-decoration carrot">
-            🥕
-        </div>
+<div class="food-decoration carrot">
+    🥕
+</div>
 
-        <!-- 제목 -->
-        <div class="main-title">
-            내 냉장고 속 미생물
-        </div>
+<div class="main-title">
+    내 냉장고 속 미생물
+</div>
 
-        <div class="subtitle">
-            내 식품의 보관 환경을 입력하고<br>
-            미생물 증식 정도를 알아보세요!
-        </div>
+<div class="subtitle">
+    내 식품의 보관 환경을 입력하고<br>
+    미생물 증식 정도를 알아보세요!
+</div>
 
-    </div>
-    """, unsafe_allow_html=True)
-
+</div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.write("")
 
-
     col1, col2 = st.columns(2)
 
-
     with col1:
-
         if st.button(
             "🥕 새 식품 추가하기",
             use_container_width=True
         ):
-
             st.session_state.page = "input"
-
             st.rerun()
 
-
     with col2:
-
         if st.button(
             "🧊 내 냉장고 구경하기",
             use_container_width=True
         ):
-
             st.session_state.page = "fridge"
-
             st.rerun()
 
+    st.markdown(
+        """
+<div class="notice">
 
-    st.markdown("""
-    <div class="notice">
+⚠️ <b>중요한 안내</b>
 
-    ⚠️ 이 앱의 미생물 증식 지수는
-    식품 종류, 보관 온도, 보관 기간 등의 조건을
-    단순화하여 계산한 <b>교육용 추정값</b>입니다.
+<br><br>
 
-    <br><br>
+이 앱의 미생물 증식 지수는
+식품 종류, 보관 온도, 보관 기간 등의 조건을
+단순화하여 계산한 <b>교육용 추정값</b>입니다.
 
-    실제 미생물의 수를 측정하거나
-    실제 식품의 상태와 안전성을 보장하지 않습니다.
+<br><br>
 
-    <br><br>
+실제 미생물의 수를 측정하거나
+실제 식품의 상태와 안전성을 보장하지 않습니다.
 
-    따라서 이 지수만으로 식품의 섭취 가능 여부를
-    판단해서는 안 됩니다.
+<br><br>
 
-    </div>
-    """, unsafe_allow_html=True)
+따라서 이 지수만으로 식품의 섭취 가능 여부를
+판단해서는 안 됩니다.
 
+</div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # =========================================================
 # 입력 화면
