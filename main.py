@@ -753,23 +753,24 @@ if food_name.strip() == "":
 
         food_data = {
 
-            "id": datetime.now(KST).strftime(
-                "%Y%m%d%H%M%S%f"
-            ),
+    "id": datetime.now(KST).strftime(
+        "%Y%m%d%H%M%S%f"
+    ),
 
-            "food": food,
+    "food_type": food_type,
 
-            "storage": storage,
+    "food_name": food_name.strip(),
 
-            "start_date": start_date.isoformat(),
+    "storage": storage,
 
-            "temperature": temperature,
+    "start_date": start_date.isoformat(),
 
-            "opened": opened == "개봉함",
+    "temperature": temperature,
 
-            "cooked": cooked == "조리함"
-        }
+    "opened": opened == "개봉함",
 
+    "cooked": cooked == "조리함"
+}
 
         st.session_state.foods.append(
             food_data
@@ -803,7 +804,7 @@ def current_index(food):
 
 
     return calculate_index(
-        food["food"],
+        food["food_type"],
         food["storage"],
         food["temperature"],
         days,
@@ -839,7 +840,7 @@ def result_page():
     start = date.fromisoformat(food["start_date"])
     days = get_days(start)
 
-    st.title(f"{food['food']} 미생물 결과")
+    st.title(f"{food['food_name']} 미생물 결과")
 
     # =========================================
     # 접시
@@ -985,7 +986,11 @@ color:#444444;
     with st.expander("🔍 입력한 식품 정보 보기"):
 
         st.write(
-            f"**식품 종류:** {food['food']}"
+            f"**식품 이름:** {food['food_name']}"
+        )
+
+        st.write(
+            f"**식품 종류:** {food['food_type']}"
         )
 
         st.write(
@@ -1073,8 +1078,7 @@ def fridge_page():
 
         with cols[i % 3]:
 
-            emoji = food["food"].split()[0]
-
+            emoji = food["food_type"].split()[0]
 
             st.markdown(
                 f"""
@@ -1085,7 +1089,7 @@ def fridge_page():
                     </div>
 
                     <div class="food-name">
-                        {food["food"]}
+                        {food["food_name"]}
                     </div>
 
                     <div style="
