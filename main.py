@@ -1030,82 +1030,98 @@ color:#444444;
 def fridge_page():
 
     if st.button("← 시작 화면"):
-
         st.session_state.page = "home"
-
         st.rerun()
-
 
     st.title("🧊 내 냉장고 구경하기")
 
-
     foods = st.session_state.foods
-
 
     if not foods:
 
-        st.info(
-            "아직 등록된 식품이 없습니다."
-        )
+        st.info("아직 등록된 식품이 없습니다.")
 
         if st.button("🥕 새 식품 추가하기"):
-
             st.session_state.page = "input"
-
             st.rerun()
 
         return
-
 
     st.write(
         f"등록된 식품: {len(foods)} / {MAX_FOODS}"
     )
 
-
     cols = st.columns(3)
 
-
     for i, food in enumerate(foods):
+
+        # =========================================
+        # 기존 데이터와 새 데이터 모두 호환
+        # =========================================
+
+        food_type = food.get(
+            "food_type",
+            food.get("food", "🍱 기타")
+        )
+
+        food_name = food.get(
+            "food_name",
+            food.get("food", "이름 없는 식품")
+        )
+
+        # =========================================
+        # 미생물 증식 지수
+        # =========================================
 
         index = current_index(food)
 
         color, status = get_status(index)
 
+        # =========================================
+        # 식품 이모지
+        # =========================================
+
+        emoji = food_type.split()[0]
+
+        # =========================================
+        # 카드
+        # =========================================
 
         with cols[i % 3]:
 
-            emoji = food["food_type"].split()[0]
-
             st.markdown(
                 f"""
-                <div class="food-card">
+<div class="food-card">
 
-                    <div class="food-emoji">
-                        {emoji}
-                    </div>
+<div class="food-emoji">
+{emoji}
+</div>
 
-                    <div class="food-name">
-                        {food["food_name"]}
-                    </div>
+<div class="food-name">
+{food_name}
+</div>
 
-                    <div style="
-                        font-size:2.2rem;
-                        font-weight:900;
-                        color:{color};
-                        margin:10px;
-                    ">
-                        {index}%
-                    </div>
+<div style="
+font-size:2.2rem;
+font-weight:900;
+color:{color};
+margin:10px;
+">
+{index}%
+</div>
 
-                    <div>
-                        {food["storage"]}
-                    </div>
+<div>
+{food["storage"]}
+</div>
 
-                </div>
+</div>
                 """,
                 unsafe_allow_html=True
             )
 
+            # =====================================
+            # 80% 이상 경고
+            # =====================================
 
             if index >= 80:
 
@@ -1113,6 +1129,9 @@ def fridge_page():
                     "⚠️ 보관 상태를 확인하세요!"
                 )
 
+            # =====================================
+            # 상세 결과
+            # =====================================
 
             if st.button(
                 "상세 결과 보기",
@@ -1120,14 +1139,15 @@ def fridge_page():
                 use_container_width=True
             ):
 
-                st.session_state.selected_food = (
-                    food["id"]
-                )
+                st.session_state.selected_food = food["id"]
 
                 st.session_state.page = "result"
 
                 st.rerun()
 
+            # =====================================
+            # 삭제
+            # =====================================
 
             if st.button(
                 "🗑️ 삭제",
