@@ -799,7 +799,6 @@ def current_index(food):
 
     days = get_days(start)
 
-
     return calculate_index(
         food["food_type"],
         food["storage"],
