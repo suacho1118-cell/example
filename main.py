@@ -665,10 +665,18 @@ def input_page():
     st.subheader("2. 식품 정보")
 
 
-    food = st.selectbox(
-        "식품 종류",
-        list(FOOD_TYPES.keys())
-    )
+    food_type = st.selectbox(
+    "식품 종류",
+    list(FOOD_TYPES.keys())
+)
+
+food_name = st.text_input(
+    "식품 이름",
+    placeholder="예: 김치볶음밥, 딸기잼, 남은 피자 등"
+)
+
+if food_name.strip() == "":
+    food_name = food_type
 
 
     today = datetime.now(KST).date()
