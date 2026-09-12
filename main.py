@@ -799,8 +799,13 @@ def current_index(food):
 
     days = get_days(start)
 
+    food_type = food.get(
+        "food_type",
+        food.get("food", "🍱 기타")
+    )
+
     return calculate_index(
-        food["food_type"],
+        food_type,
         food["storage"],
         food["temperature"],
         days,
@@ -836,7 +841,17 @@ def result_page():
     start = date.fromisoformat(food["start_date"])
     days = get_days(start)
 
-    st.title(f"{food['food_name']} 미생물 결과")
+    food_name = food.get(
+    "food_name",
+    food.get("food", "이름 없는 식품")
+)
+
+    food_type = food.get(
+    "food_type",
+    food.get("food", "🍱 기타")
+)
+
+    st.title(f"{food_name} 미생물 결과")
 
     # =========================================
     # 접시
