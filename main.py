@@ -689,33 +689,59 @@ def input_page():
 
     st.title("🥕 새 식품 추가하기")
 
-    # =========================================
-    # 1. 보관 환경
-    # =========================================
+# =========================================
+# 1. 보관 환경
+# =========================================
 
-    st.subheader("1. 보관 환경")
+st.subheader("1. 보관 환경")
 
-    col1, col2, col3 = st.columns(3)
+storage_options = [
+    "🧊 냉장",
+    "❄️ 냉동",
+    "🧺 상온"
+]
 
-    with col1:
-        if st.button("🧊 냉장", use_container_width=True):
-            st.session_state.storage = "냉장"
+# 현재 선택된 값이 있으면 그것을 기본값으로 사용
+current_storage = st.session_state.get("storage")
 
-    with col2:
-        if st.button("❄️ 냉동", use_container_width=True):
-            st.session_state.storage = "냉동"
+if current_storage == "냉장":
+    default_storage = "🧊 냉장"
+elif current_storage == "냉동":
+    default_storage = "❄️ 냉동"
+elif current_storage == "상온":
+    default_storage = "🧺 상온"
+else:
+    default_storage = None
 
-    with col3:
-        if st.button("🧺 상온", use_container_width=True):
-            st.session_state.storage = "상온"
+# 선택 버튼
+selected_storage = st.pills(
+    "보관 환경을 선택하세요",
+    storage_options,
+    selection_mode="single",
+    default=default_storage,
+    label_visibility="collapsed"
+)
 
-    storage = st.session_state.storage
+# 선택 결과 저장
+if selected_storage is not None:
 
-    if storage is None:
-        st.info("보관 환경을 선택해주세요.")
-        return
+    if selected_storage == "🧊 냉장":
+        st.session_state.storage = "냉장"
 
-    st.success(f"현재 선택: {storage}")
+    elif selected_storage == "❄️ 냉동":
+        st.session_state.storage = "냉동"
+
+    elif selected_storage == "🧺 상온":
+        st.session_state.storage = "상온"
+
+
+storage = st.session_state.get("storage")
+
+if storage is None:
+    st.info("👆 보관 환경을 선택해주세요.")
+    return
+
+st.success(f"현재 선택: {storage}")
 
     st.divider()
 
