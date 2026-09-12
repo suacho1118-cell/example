@@ -811,162 +811,207 @@ def current_index(food):
 def result_page():
 
     food = next(
-        (
-            x for x in st.session_state.foods
-            if x["id"] == st.session_state.selected_food
-        ),
+        (x for x in st.session_state.foods
+         if x["id"] == st.session_state.selected_food),
         None
     )
 
-
     if food is None:
-
         st.session_state.page = "home"
-
         st.rerun()
-
 
     if st.button("← 내 냉장고로 돌아가기"):
-
         st.session_state.page = "home"
-
         st.rerun()
-
 
     index = current_index(food)
 
     color, status = get_status(index)
 
-
-    start = date.fromisoformat(
-        food["start_date"]
-    )
-
+    start = date.fromisoformat(food["start_date"])
     days = get_days(start)
 
+    st.title(f"{food['food']} 미생물 결과")
 
-    st.title(
-        f"{food['food']} 미생물 결과"
-    )
-
-
+    # =========================================
     # 접시
+    # =========================================
+
     st.markdown(
         f"""
-        <div class="plate-wrapper">
+<div style="display:flex;justify-content:center;margin:30px;">
 
-            <div class="plate">
+<div style="
+width:300px;
+height:300px;
+border-radius:50%;
+background:#eeeeee;
+border:15px solid #cccccc;
+box-shadow:inset 0 0 0 15px white, 0 15px 30px rgba(0,0,0,0.18);
+position:relative;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+">
 
-                <div
-                    class="plate-fill"
-                    style="
-                        height:{max(index, 3)}%;
-                        background:{color};
-                    ">
-                </div>
+<div style="
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+height:{max(index, 3)}%;
+background:{color};
+opacity:0.82;
+"></div>
 
-                <div class="plate-inner">
+<div style="
+position:relative;
+z-index:2;
+width:200px;
+height:200px;
+border-radius:50%;
+background:rgba(255,255,255,0.75);
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+font-size:32px;
+font-weight:900;
+color:#444444;
+">
 
-                    <div class="plate-text">
-                        🦠<br>
-                        {index}%
-                    </div>
+🦠<br>{index}%
 
-                </div>
+</div>
 
-            </div>
+</div>
 
-        </div>
+</div>
         """,
         unsafe_allow_html=True
     )
 
+    # =========================================
+    # 증식 지수
+    # =========================================
 
     st.markdown(
         f"""
-        <h1 style="
-            text-align:center;
-            color:{color};
-        ">
-            미생물 증식 지수 {index}%
-        </h1>
+<h1 style="text-align:center;color:{color};">
+미생물 증식 지수 {index}%
+</h1>
 
-        <p style="
-            text-align:center;
-            font-size:1.3rem;
-        ">
-            현재 상태: <b>{status}</b>
-        </p>
+<p style="text-align:center;font-size:20px;">
+현재 상태: <b>{status}</b>
+</p>
         """,
         unsafe_allow_html=True
     )
 
+    # =========================================
+    # 기본 정보
+    # =========================================
 
     col1, col2, col3 = st.columns(3)
 
-
     with col1:
-
         st.metric(
             "보관 환경",
             food["storage"]
         )
 
-
     with col2:
-
         st.metric(
             "보관 기간",
             f"{days}일째"
         )
 
-
     with col3:
-
         st.metric(
             "현재 온도",
             f"{food['temperature']}℃"
         )
 
+    # =========================================
+    # 상태 설명
+    # =========================================
 
-    if index >= 80:
+    if index <= 20:
+
+        st.success(
+            "현재 입력된 조건에서는 미생물 증식 지수가 "
+            "상대적으로 낮게 계산되었습니다."
+        )
+
+    elif index <= 40:
+
+        st.info(
+            "보관 환경과 기간을 계속 확인해 주세요."
+        )
+
+    elif index <= 60:
+
+        st.warning(
+            "보관 환경이나 기간에 따라 "
+            "미생물 증식 가능성이 커질 수 있습니다."
+        )
+
+    elif index <= 80:
+
+        st.warning(
+            "⚠️ 미생물 증식 지수가 높은 편입니다. "
+            "보관 상태를 주의 깊게 확인하세요."
+        )
+
+    else:
 
         st.error(
             "⚠️ 보관 상태를 확인하세요!"
         )
 
-    elif index >= 60:
+    # =========================================
+    # 입력 정보
+    # =========================================
 
-        st.warning(
-            "보관 환경과 기간을 주의 깊게 확인하세요."
+    with st.expander("🔍 입력한 식품 정보 보기"):
+
+        st.write(
+            f"**식품 종류:** {food['food']}"
         )
 
-    else:
-
-        st.info(
-            "현재 입력된 조건을 바탕으로 계산한 "
-            "교육용 추정 결과입니다."
+        st.write(
+            f"**보관 환경:** {food['storage']}"
         )
 
+        st.write(
+            f"**보관 시작일:** {food['start_date']}"
+        )
 
-    st.markdown("""
-    <div class="notice">
+        st.write(
+            f"**현재 보관 온도:** {food['temperature']}℃"
+        )
 
-    ⚠️ <b>중요한 안내</b>
+        st.write(
+            f"**개봉 여부:** "
+            f"{'개봉함' if food['opened'] else '미개봉'}"
+        )
 
-    <br><br>
+        st.write(
+            f"**조리 여부:** "
+            f"{'조리함' if food['cooked'] else '조리하지 않음'}"
+        )
 
-    이 미생물 증식 지수는 실제 미생물의 수를
-    측정한 값이 아닙니다.
+    # =========================================
+    # 주의사항
+    # =========================================
 
-    <br><br>
-
-    실제 식품의 상태와 안전성을 보장하지 않으며,
-    증식 지수만으로 식품의 섭취 가능 여부를
-    판단해서는 안 됩니다.
-
-    </div>
-    """, unsafe_allow_html=True)
+    st.warning(
+        "⚠️ 이 앱의 미생물 증식 지수는 실제 미생물의 수를 "
+        "측정한 값이 아닌 교육용 추정값입니다. "
+        "실제 식품의 상태와 안전성을 보장하지 않으며, "
+        "이 지수만으로 식품의 섭취 가능 여부를 판단해서는 안 됩니다."
+    )
 
 
 # =========================================================
