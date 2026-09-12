@@ -380,89 +380,174 @@ FOOD_TYPES = {
 # =========================================================
 
 def calculate_index(
-    food,
+    food_type,
     storage,
     temperature,
     days,
     opened,
     cooked
 ):
+    """
+    미생물 증식 지수 계산
+    ---------------------------------
+    실제 미생물 수를 측정하는 값이 아니라
+    식품 보관 조건을 바탕으로 한 교육용 추정 지수.
+    결과는 항상 0~100%로 제한한다.
+    """
 
-    score = FOOD_TYPES[food]
+    # =========================================
+    # 1. 식품별 기준 보관기간
+    # =========================================
+    #
+    # 기준기간을 지나면서 지수가 빠르게 증가하도록 설정
+    # 실제 안전성을 판정하는 값이 아님
+    #
 
-    # 보관 환경
-    if storage == "냉장":
-        score -= 20
+    reference_days = {
 
-    elif storage == "냉동":
-        score -= 40
+        # 🥚 달걀
+        "🥚 달걀": 28,
 
-    elif storage == "상온":
-        score += 15
+        # 🍚 밥 / 곡류
+        "🍚 밥": 4,
 
+        # 🥩 육류
+        "🥩 육류": 3,
 
-    # 온도
-    if storage == "냉장":
+        # 🐟 생선
+        "🐟 생선": 2,
 
-        if temperature <= 4:
-            score -= 15
+        # 🥛 유제품
+        "🥛 우유": 7,
 
-        elif temperature <= 8:
-            score -= 5
+        # 🥬 채소
+        "🥬 채소": 7,
 
-        elif temperature <= 12:
-            score += 10
+        # 🍎 과일
+        "🍎 과일": 7,
 
-        else:
-            score += 25
+        # 🍱 조리식품
+        "🍱 조리식품": 3,
 
+        # 🍞 빵
+        "🍞 빵": 5,
 
-    elif storage == "냉동":
+        # 🧀 치즈
+        "🧀 치즈": 14,
 
-        if temperature <= -18:
-            score -= 30
+        # 🥫 통조림
+        "🥫 통조림": 30,
 
-        elif temperature <= -10:
-            score -= 20
+        # 기타
+        "📦 기타": 7
+    }
 
-        else:
-            score -= 5
+    # =========================================
+    # 식품 종류 찾기
+    # =========================================
 
+    reference = reference_days.get(
+        food_type,
+        7
+    )
+
+    # =========================================
+    # 2. 보관기간에 따른 기본 지수
+    # =========================================
+
+    # 기간이 기준기간의 몇 배인지 계산
+    ratio = days / reference
+
+    if ratio <= 0:
+        index = 0
+
+    elif ratio <= 0.25:
+        # 기준기간의 25% 이내
+        index = ratio * 40
+
+    elif ratio <= 0.5:
+        # 25~50%
+        index = 10 + (ratio - 0.25) * 80
+
+    elif ratio <= 1.0:
+        # 50~100%
+        index = 30 + (ratio - 0.5) * 100
+
+    elif ratio <= 2.0:
+        # 기준기간을 넘으면 빠르게 증가
+        index = 80 + (ratio - 1.0) * 15
 
     else:
+        # 기준기간의 2배 이상이면 매우 높은 지수
+        index = 95
 
-        if temperature <= 10:
-            score -= 5
+    # =========================================
+    # 3. 보관온도 보정
+    # =========================================
 
-        elif temperature <= 20:
-            score += 5
+    if storage == "냉동":
 
-        elif temperature <= 30:
-            score += 20
+        # -18℃ 부근에서는 증식이 매우 제한된다고 가정
+        temperature_factor = 0.15
+
+    elif storage == "냉장":
+
+        if temperature <= 4:
+            temperature_factor = 0.75
+
+        elif temperature <= 7:
+            temperature_factor = 1.0
 
         else:
-            score += 35
+            temperature_factor = 1.25
 
+    else:
+        # 상온
+        if temperature <= 15:
+            temperature_factor = 1.15
 
-    # 보관 기간
-    if days > 0:
-        score += min(45, math.log1p(days) * 13)
+        elif temperature <= 25:
+            temperature_factor = 1.4
 
+        else:
+            temperature_factor = 1.7
 
-    # 개봉
+    index *= temperature_factor
+
+    # =========================================
+    # 4. 개봉 여부
+    # =========================================
+
     if opened:
-        score += 12
+        index += 10
 
+    # =========================================
+    # 5. 조리 여부
+    # =========================================
 
-    # 조리
     if cooked:
-        score += 8
+        index += 5
 
+    # =========================================
+    # 6. 냉동 보정
+    # =========================================
 
-    # 0~100 제한
-    score = max(0, min(100, round(score)))
+    if storage == "냉동":
 
-    return score
+        # 냉동은 '증식'을 크게 억제하지만
+        # 해동/재냉동 등의 복잡한 상황은 이 모델에서 다루지 않음
+        index *= 0.5
+
+    # =========================================
+    # 7. 0~100% 범위 제한
+    # =========================================
+
+    index = max(
+        0,
+        min(100, index)
+    )
+
+    return round(index)
 
 
 # =========================================================
